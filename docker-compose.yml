@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  app:
+    build: ./infra/php
+    volumes:
+      - ./src:/data
+
+  mysql:
+    image: mysql:8.0.26
+    platform: linux/amd64
+    volumes:
+      - ./mysql:/var/lib/mysql
+    ports:
+      - '3360:80'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=test
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test
+      #- TZ=Asia/Tokyo
