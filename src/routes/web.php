@@ -1,8 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,9 +11,6 @@ use App\Http\Controllers;
 |
 */
 
-Auth::routes(); 
-Route::get('/', [Controllers\ArticleController::class, 'index']);
-
 Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/', 'ArticleController@index')->name('articles.index');
+Route::resource('/articles', 'ArticleController')->except(['index'])->middleware('auth');
