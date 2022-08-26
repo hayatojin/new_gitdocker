@@ -24,7 +24,7 @@ services:
     volumes:
       - db-store:/var/lib/mysql
     ports:
-      - 33060:3306
+      - 3306:3306
 
   mail:
     image: mailhog/mailhog

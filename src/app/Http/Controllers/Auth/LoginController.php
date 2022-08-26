@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
@@ -37,4 +40,32 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    // Googleのアカウント選択画面へリダイレクト
+    public function redirectToProvider(string $provider)
+    {
+        // Socialiteのdriverメソッドに、外部のサービス名を渡し、リダイレクト
+        return Socialite::driver($provider)->redirect();
+    }
+
+    public function handleProviderCallback(Request $request, string $provider)
+    {
+        // Googleからユーザー情報を取得
+        $providerUser = Socialite::driver($provider)->stateless()->user();
+
+        // Googleから取得したユーザー情報から、メールアドレスを取り出し、そのメアドがusersテーブルにあるか調べる
+        $user = User::where('email', $providerUser->getEmail())->first();
+
+        // 本サービスのusersテーブルに、Googleから取得したメールアドレスがあれば、ログインレスポンスを返す
+        if ($user) {
+            $this->guard()->login($user, true);
+            return $this->sendLoginResponse($request);
+        }
+
+        return redirect()->route('register.{provider}', [
+            'provider' => $provider,
+            'email' => $providerUser->getEmail(),
+            'token' => $providerUser->token,
+        ]); 
+    }       
 }
